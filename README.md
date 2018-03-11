@@ -23,8 +23,12 @@ The block passed to this method, will get all the *non response* `Message`
 
 `dispatch_multi(params_map, &processor)`
 
-* `params_map` a map of requests (see the example below)
-* `processor` optional block to, accepting a map of responses
+Sometimes it's also necessary to dispatch mutiple messages and receive all of them to handle a task, but we want to do other things until then. This method can send many messages, and invoke the block when all of them are finished.
+
+However, we not always expect to have a response to some of the messages. See the example below.
+
+* `params_map` a map of requests
+* `processor` optional block, accepting a map of responses
 
 
 ### Example
@@ -49,14 +53,12 @@ opts = {allowed_targets: [:user], logger: logger}
 
 handler = AsyncService.create_redis_json_handler(:group, redis, opts)
 
-
 params = {
     test_1: {target: :user, params: {action: 'start'}},
-    test_2: {target: :user, params: {action: 'stop'}}
+    test_2: {target: :user, params: {action: 'stop'}, no_response: true}
 }
 handler.dispatch_multi(params) do |responses|
   puts responses[:test_1].params
-  puts responses[:test_2].params
 end
 
 while true
