@@ -25,10 +25,10 @@ The block passed to this method, will get all the *non response* `Message`
 
 Sometimes it's also necessary to dispatch mutiple messages and receive all of them to handle a task, but we want to do other things until then. This method can send many messages, and invoke the block when all of them are finished.
 
-However, we not always expect to have a response to some of the messages, so it's need to be told the `Listener`. See the example below.
+However, in some special cases, we don't expect to have a response to some of the messages, so it's need to be told to the `Listener`, so it won't wait for a response, to the given request, thus won't be presented in the response map.  See the example below.
 
 * `params_map` a map of requests
-* `processor` optional block, accepting a map of responses
+* `processor` optional block, accepting a map of responses 
 
 
 ### Example
@@ -62,8 +62,12 @@ handler.dispatch_multi(params) do |responses|
 end
 
 while true
-  handler.receive do |req|
-    # handle non response requests
+  begin 
+    handler.receive do |req|
+      # handle non response requests
+    end
+  rescue AsyncService::MessageError => e
+    puts e.service_message
   end
 end
 ```
@@ -86,11 +90,10 @@ handler = AsyncService.create_redis_json_handler(:user, redis, opts)
 while true
   handler.receive do |request|
     if 'start' == request.params[:action]
-      # Do something, and send a response to the request
-      handler.dispatch({started: true}, request)
+      # To the request we won't 
     end
     if 'stop' == request.params[:action]
-      # 
+      # Do something, and send a response
       handler.dispatch({stopped: true}, request)
     end
   end
