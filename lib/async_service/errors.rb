@@ -1,21 +1,20 @@
 module AsyncService
 
   class MessageError < ArgumentError
-    attr_reader :message_id, :parent_id, :origin
 
-    def initialize(message, reason)
-      @message_id = message.id
-      @parent_id = message.parent_id
-      @origin = message.origin
+    attr_reader :service_message
 
+    def initialize(reason, service_message)
       super(reason)
+
+      @service_message = service_message
     end
   end
 
   class UnknownParentError < MessageError
 
-    def initialize(message)
-      super(message, "Unknown parent id '#{message.parent_id}'")
+    def initialize(service_message)
+      super("Unknown parent id '#{service_message.parent_id}'", service_message)
     end
   end
 

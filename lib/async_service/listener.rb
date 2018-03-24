@@ -43,14 +43,18 @@ module AsyncService
 
       params_map.each do |name, msg_def|
         msg = create_message(msg_def[:params])
-        messages[name] = msg.id
+        unless msg_def.fetch(:no_response, false)
+          messages[name] = msg.id
+        end
         target = msg_def[:target]
 
         @logger.debug("Dispatching multi message '#{msg.id}' to target:'#{target}'")
         @queue.enqueue_to(target, @serializer.serialize(msg))
       end
 
-      @multi_message_processors << {messages: messages, processor: processor}
+      if processor
+        @multi_message_processors << {messages: messages, processor: processor}
+      end
     end
 
     def receive(&default_processor)
@@ -96,10 +100,7 @@ module AsyncService
 
       if finished
         @multi_message_processors.delete(found)
-
-        if found.key?(:processor)
-          found[:processor].call(found[:messages])
-        end
+        found[:processor].call(found[:messages])
       end
     end
 

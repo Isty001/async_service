@@ -2,6 +2,7 @@ require_relative 'async_service/listener'
 require_relative 'async_service/serializer/json_serializer'
 require_relative 'async_service/queue/redis_queue'
 require_relative 'async_service/message/message'
+require_relative 'async_service/errors'
 
 
 module AsyncService
